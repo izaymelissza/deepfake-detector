@@ -1,7 +1,10 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
+from PIL import Image
+import io
+import random
 
 from database import get_db, User
 from auth import hash_password, verify_password, create_token
@@ -74,3 +77,36 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
     # Create token
     token = create_token(user.id)
     return TokenResponse(access_token=token)
+
+@app.post("/predict")
+async def predict_deepfake(file: UploadFile = File(...)):
+    """
+    Predict if image is deepfake (DUMMY VERSION - no model yet!)
+    """
+    
+    # Validate file
+    if not file.content_type.startswith('image/'):
+        raise HTTPException(status_code=400, detail="File must be an image")
+    
+    try:
+        # Read image
+        contents = await file.read()
+        image = Image.open(io.BytesIO(contents))
+        
+        # DUMMY PREDICTION (később lesz model!)
+        is_fake = random.choice([True, False])
+        confidence = random.uniform(0.75, 0.99)
+        
+        return {
+            'prediction': 'FAKE' if is_fake else 'REAL',
+            'is_fake': is_fake,
+            'confidence': round(confidence, 2),
+            'probability': round(confidence if is_fake else 1 - confidence, 2),
+            'details': {
+                'fake_score': round(confidence if is_fake else 1 - confidence, 2),
+                'real_score': round(1 - confidence if is_fake else confidence, 2)
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
