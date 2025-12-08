@@ -4,10 +4,12 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
 from PIL import Image
 import io
-import random
+from typing import List
+from datetime import datetime
 
-from database import get_db, User
-from auth import hash_password, verify_password, create_token
+from database import get_db, User, Detection
+from auth import hash_password, verify_password, create_token, get_current_user
+from inference import inference_service  # ← EZ KELL!
 
 app = FastAPI()
 
@@ -20,6 +22,36 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.on_event("startup")
+async def startup_event():
+    """Load model on startup"""
+    import os
+    
+    model_path = "models/best_efficientnet_b4.pth"
+    
+    print("=" * 60)
+    print("🚀 STARTING MODEL LOAD...")
+    print("=" * 60)
+    print(f"🔍 Current directory: {os.getcwd()}")
+    print(f"🔍 Model path: {model_path}")
+    print(f"🔍 Absolute path: {os.path.abspath(model_path)}")
+    print(f"🔍 File exists: {os.path.exists(model_path)}")
+    
+    if os.path.exists(model_path):
+        file_size = os.path.getsize(model_path) / (1024 * 1024)  # MB
+        print(f"🔍 File size: {file_size:.2f} MB")
+    
+    print("-" * 60)
+    
+    success = inference_service.load_model(model_path)
+    
+    print("-" * 60)
+    if success:
+        print("✅ MODEL LOADED SUCCESSFULLY!")
+    else:
+        print("⚠️  MODEL NOT LOADED - USING DUMMY PREDICTIONS")
+    print("=" * 60)
+    
 # Schemas
 class RegisterRequest(BaseModel):
     email: EmailStr
@@ -66,12 +98,21 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)):
     token = create_token(user.id)
     return TokenResponse(access_token=token)
 
+from fastapi.security import OAuth2PasswordRequestForm
+from database import Base, engine
+
 @app.post("/login", response_model=TokenResponse)
-def login(data: LoginRequest, db: Session = Depends(get_db)):
-    # Find user
-    user = db.query(User).filter(User.email == data.email).first()
+def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),  # ← ÚJ! Form helyett JSON
+    db: Session = Depends(get_db)
+):
+    # form_data.username = email
+    # form_data.password = password
     
-    if not user or not verify_password(data.password, user.hashed_password):
+    # Find user
+    user = db.query(User).filter(User.email == form_data.username).first()
+    
+    if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     # Create token
@@ -79,9 +120,13 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
     return TokenResponse(access_token=token)
 
 @app.post("/predict")
-async def predict_deepfake(file: UploadFile = File(...)):
+async def predict_deepfake(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
-    Predict if image is deepfake (DUMMY VERSION - no model yet!)
+    Predict if image is deepfake using trained model
     """
     
     # Validate file
@@ -91,22 +136,64 @@ async def predict_deepfake(file: UploadFile = File(...)):
     try:
         # Read image
         contents = await file.read()
-        image = Image.open(io.BytesIO(contents))
+        image = Image.open(io.BytesIO(contents)).convert('RGB')
         
-        # DUMMY PREDICTION (később lesz model!)
-        is_fake = random.choice([True, False])
-        confidence = random.uniform(0.75, 0.99)
+        print(f"✓ Image loaded: {file.filename}")
         
-        return {
-            'prediction': 'FAKE' if is_fake else 'REAL',
-            'is_fake': is_fake,
-            'confidence': round(confidence, 2),
-            'probability': round(confidence if is_fake else 1 - confidence, 2),
-            'details': {
-                'fake_score': round(confidence if is_fake else 1 - confidence, 2),
-                'real_score': round(1 - confidence if is_fake else confidence, 2)
-            }
-        }
+        # Predict using model
+        result = inference_service.predict(image)
+        
+        print(f"✓ Prediction: {result['prediction']}, Confidence: {result['confidence']}")
+        
+        # Save to database
+        try:
+            detection = Detection(
+                user_id=current_user.id,
+                filename=file.filename,
+                prediction=result['prediction'],
+                confidence=result['confidence']
+            )
+            db.add(detection)
+            db.commit()
+            db.refresh(detection)
+            
+            print(f"✓ Detection saved! ID: {detection.id}")
+            
+        except Exception as db_error:
+            print(f"⚠️  Database save failed: {db_error}")
+            db.rollback()
+            # Continue anyway - prediction still works!
+        
+        return result
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
+        print(f"❌ Prediction failed!")
+        print(f"❌ Error type: {type(e).__name__}")
+        print(f"❌ Error message: {str(e)}")
+        
+        import traceback
+        traceback.print_exc()
+        
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Prediction failed: {str(e)}"
+        )
+    
+@app.get("/history")
+def get_history(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    detections = db.query(Detection)\
+        .filter(Detection.user_id == current_user.id)\
+        .order_by(Detection.created_at.desc())\
+        .limit(20)\
+        .all()
+    
+    return [{
+        'id': d.id,
+        'filename': d.filename,
+        'prediction': d.prediction,
+        'confidence': d.confidence,
+        'created_at': d.created_at.isoformat()
+    } for d in detections]

@@ -64,7 +64,7 @@ const LoginPage: React.FC = () => {
                 marginBottom: '20px',
               }}
             >
-              ⚠️ {error}
+              ⚠️ {String(error)}
             </div>
           )}
 
