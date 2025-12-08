@@ -32,3 +32,6 @@ frontend/package-lock.json
 # OS
 .DS_Store
 Thumbs.db
+
+#model
+backend/models
