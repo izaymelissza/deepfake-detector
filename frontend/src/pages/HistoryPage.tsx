@@ -57,7 +57,7 @@ const HistoryPage: React.FC = () => {
         }}>
           <div>
             <h1 style={{ fontSize: '2.5rem', color: '#1a237e', margin: '0 0 10px 0' }}>
-              📊 Detection History
+              Detection History
             </h1>
             <p style={{ color: '#666', margin: 0 }}>
               Your past deepfake detection results
@@ -76,7 +76,7 @@ const HistoryPage: React.FC = () => {
                 fontWeight: 600
               }}
             >
-              🔍 New Detection
+              New Detection
             </button>
             <button
               onClick={handleLogout}
@@ -90,7 +90,7 @@ const HistoryPage: React.FC = () => {
                 color: '#1a237e'
               }}
             >
-              🚪 Logout
+              Logout
             </button>
           </div>
         </div>

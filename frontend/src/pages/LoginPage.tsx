@@ -46,7 +46,7 @@ const LoginPage: React.FC = () => {
         >
           {/* Logo */}
           <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-            <div style={{ fontSize: '48px', marginBottom: '10px' }}>🛡️</div>
+            <div style={{ fontSize: '48px', marginBottom: '10px' }}></div>
             <h2 style={{ fontSize: '2rem', fontWeight: 700, color: '#1a237e', marginBottom: '8px' }}>
               Welcome Back
             </h2>

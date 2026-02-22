@@ -26,6 +26,7 @@ class InferenceService:
                 std=[0.229, 0.224, 0.225]
             )
         ])
+        
     
     def load_model(self, model_path: str):
         """Load trained model"""

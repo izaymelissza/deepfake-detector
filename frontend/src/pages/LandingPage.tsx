@@ -19,7 +19,7 @@ const LandingPage: React.FC = () => {
           <h1 style={{ fontSize: '3.5rem', fontWeight: 800, marginBottom: '20px', lineHeight: 1.2 }}>
             Detect Deepfakes
             <br />
-            with AI 🤖
+            with AI 
           </h1>
           <p style={{ fontSize: '1.5rem', opacity: 0.9, marginBottom: '40px' }}>
             Protect yourself from manipulated media using advanced
@@ -40,7 +40,7 @@ const LandingPage: React.FC = () => {
                 boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
               }}
             >
-              Get Started Free 🚀
+              Get Started Free 
             </button>
             <button
               onClick={() => navigate('/login')}
@@ -74,7 +74,7 @@ const LandingPage: React.FC = () => {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '40px' }}>
           {/* Card 1 */}
           <div style={{ textAlign: 'center', padding: '30px', backgroundColor: '#f5f5f5', borderRadius: '12px' }}>
-            <div style={{ fontSize: '60px', marginBottom: '20px' }}>⚠️</div>
+            <div style={{ fontSize: '60px', marginBottom: '20px' }}></div>
             <h3 style={{ fontSize: '1.5rem', marginBottom: '15px', color: '#1a237e' }}>The Threat</h3>
             <p style={{ color: '#666', lineHeight: 1.6 }}>
               Deepfakes can spread misinformation, damage reputations,
@@ -85,10 +85,10 @@ const LandingPage: React.FC = () => {
 
           {/* Card 2 */}
           <div style={{ textAlign: 'center', padding: '30px', backgroundColor: '#f5f5f5', borderRadius: '12px' }}>
-            <div style={{ fontSize: '60px', marginBottom: '20px' }}>📈</div>
+            <div style={{ fontSize: '60px', marginBottom: '20px' }}></div>
             <h3 style={{ fontSize: '1.5rem', marginBottom: '15px', color: '#1a237e' }}>Growing Problem</h3>
             <p style={{ color: '#666', lineHeight: 1.6 }}>
-              Deepfake incidents have increased by 900% in the last year.
+              Deepfake incidents have increased by x% in the last year.
               The technology is becoming more accessible and sophisticated,
               making detection crucial.
             </p>
@@ -96,12 +96,11 @@ const LandingPage: React.FC = () => {
 
           {/* Card 3 */}
           <div style={{ textAlign: 'center', padding: '30px', backgroundColor: '#f5f5f5', borderRadius: '12px' }}>
-            <div style={{ fontSize: '60px', marginBottom: '20px' }}>🛡️</div>
+            <div style={{ fontSize: '60px', marginBottom: '20px' }}></div>
             <h3 style={{ fontSize: '1.5rem', marginBottom: '15px', color: '#1a237e' }}>Our Solution</h3>
             <p style={{ color: '#666', lineHeight: 1.6 }}>
-              We use state-of-the-art deep learning models trained on
-              millions of images to detect even the most sophisticated
-              deepfakes with high accuracy.
+              Using models to detect deepfakes, we help users verify media authenticity
+              quickly and accurately, protecting them from potential harm.
             </p>
           </div>
         </div>
@@ -119,25 +118,23 @@ const LandingPage: React.FC = () => {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '40px' }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '60px', marginBottom: '20px' }}>✅</div>
+              <div style={{ fontSize: '60px', marginBottom: '20px' }}></div>
               <h3 style={{ fontSize: '1.5rem', marginBottom: '15px', color: '#1a237e' }}>95%+ Accuracy</h3>
               <p style={{ color: '#666' }}>
-                Our AI models achieve state-of-the-art detection accuracy
-                on benchmark datasets
+                majd annyi lesz (vagy hasonlo)
               </p>
             </div>
 
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '60px', marginBottom: '20px' }}>⚡</div>
+              <div style={{ fontSize: '60px', marginBottom: '20px' }}></div>
               <h3 style={{ fontSize: '1.5rem', marginBottom: '15px', color: '#1a237e' }}>Instant Results</h3>
               <p style={{ color: '#666' }}>
-                Get detection results in seconds, not minutes. Fast and
-                reliable analysis.
+                fast results
               </p>
             </div>
 
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '60px', marginBottom: '20px' }}>👍</div>
+              <div style={{ fontSize: '60px', marginBottom: '20px' }}></div>
               <h3 style={{ fontSize: '1.5rem', marginBottom: '15px', color: '#1a237e' }}>Easy to Use</h3>
               <p style={{ color: '#666' }}>
                 Simply upload an image and get instant analysis. No
@@ -178,7 +175,7 @@ const LandingPage: React.FC = () => {
               boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
             }}
           >
-            Get Started for Free 🚀
+            Get Started for Free 
           </button>
         </div>
       </div>
@@ -186,7 +183,7 @@ const LandingPage: React.FC = () => {
       {/* Footer */}
       <div style={{ backgroundColor: '#1a237e', color: 'white', padding: '30px 20px', textAlign: 'center' }}>
         <p style={{ margin: 0, opacity: 0.7 }}>
-          © 2024 DeepGuard. Built with ❤️ for safer internet.
+          © 2025 DeepGuard
         </p>
       </div>
     </div>

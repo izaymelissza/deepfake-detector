@@ -8,7 +8,7 @@ from typing import List
 from datetime import datetime
 
 from database import get_db, User, Detection
-from auth import hash_password, verify_password, create_token, get_current_user
+from auth import get_password_hash, verify_password, create_token, get_current_user
 from inference import inference_service  # ← EZ KELL!
 
 app = FastAPI()
@@ -51,7 +51,7 @@ async def startup_event():
     else:
         print("⚠️  MODEL NOT LOADED - USING DUMMY PREDICTIONS")
     print("=" * 60)
-    
+
 # Schemas
 class RegisterRequest(BaseModel):
     email: EmailStr
@@ -88,7 +88,7 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)):
     user = User(
         email=data.email,
         username=data.username,
-        hashed_password=hash_password(data.password)
+        hashed_password=get_password_hash(data.password)
     )
     db.add(user)
     db.commit()

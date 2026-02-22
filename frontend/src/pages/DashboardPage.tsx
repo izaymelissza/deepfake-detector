@@ -102,7 +102,25 @@ const DashboardPage: React.FC = () => {
     <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5', padding: '40px 20px' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
         {/* Header */}
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div style={{ 
+          display: 'flex', 
+          gap: '12px' 
+        }}>
+          <button
+            onClick={() => navigate('/')}
+            style={{
+              padding: '12px 24px',
+              backgroundColor: 'white',
+              border: '2px solid #1a237e',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: 600,
+              color: '#1a237e',
+              fontSize: '16px'
+            }}
+          >
+            Home
+          </button>
           <button
             onClick={() => navigate('/history')}
             style={{
@@ -112,13 +130,26 @@ const DashboardPage: React.FC = () => {
               borderRadius: '8px',
               cursor: 'pointer',
               fontWeight: 600,
-              color: '#1a237e'
+              color: '#1a237e',
+              fontSize: '16px'
             }}
           >
-            📊 History
+            History
           </button>
-          <button onClick={handleLogout}>
-            🚪 Logout
+          <button
+            onClick={handleLogout}
+            style={{
+              padding: '12px 24px',
+              backgroundColor: 'white',
+              border: '2px solid #1a237e',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: 600,
+              color: '#1a237e',
+              fontSize: '16px'
+            }}
+          >
+            Logout
           </button>
         </div>
         <div style={{ 
@@ -135,26 +166,8 @@ const DashboardPage: React.FC = () => {
             margin: 0,
             fontWeight: 700
           }}>
-            🔍 Deepfake Detector
+            Deepfake Detector
           </h1>
-          <button
-            onClick={handleLogout}
-            style={{
-              padding: '12px 24px',
-              backgroundColor: 'white',
-              border: '2px solid #1a237e',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '16px',
-              fontWeight: 600,
-              color: '#1a237e',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
-          >
-            🚪 Logout
-          </button>
         </div>
 
         <p style={{ 
