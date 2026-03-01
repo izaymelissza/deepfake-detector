@@ -6,10 +6,12 @@ from PIL import Image
 import io
 from typing import List
 from datetime import datetime
-
 from database import get_db, User, Detection
 from auth import get_password_hash, verify_password, create_token, get_current_user
-from inference import inference_service  # ← EZ KELL!
+from inference import inference_service
+import cv2
+import tempfile
+import os
 
 app = FastAPI()
 
@@ -178,7 +180,131 @@ async def predict_deepfake(
             status_code=500, 
             detail=f"Prediction failed: {str(e)}"
         )
+
+@app.post("/predict/video")
+async def predict_video(   
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Predict if video is deepfake using frame-by-frame analysis
+    """
+    if not file.content_type.startswith('video/'):
+        raise HTTPException(status_code=400, detail="File must be a video")
     
+    try:
+        # Save uploaded video to temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_file:
+            contents = await file.read()
+            tmp_file.write(contents)
+            video_path = tmp_file.name
+        
+        print(f"✓ Video saved: {file.filename} ({len(contents)} bytes)")
+        
+        # Process video frame-by-frame
+        cap = cv2.VideoCapture(video_path)
+        
+        if not cap.isOpened():
+            raise HTTPException(status_code=400, detail="Could not open video file")
+        
+        frame_predictions = []
+        frame_count = 0
+        sample_rate = 10  # Analyze every 10th frame
+        
+        print(f"🎬 Processing video...")
+
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
+            
+            # Only analyze every Nth frame
+            if frame_count % sample_rate == 0:
+                try:
+                    # Convert frame to PIL Image
+                    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    from PIL import Image
+                    pil_image = Image.fromarray(frame_rgb)
+                    
+                    # Predict on frame
+                    frame_result = inference_service.predict(pil_image)
+                    frame_predictions.append(frame_result['probability'])  # fake probability
+                    
+                except Exception as frame_error:
+                    print(f"⚠️  Frame {frame_count} failed: {frame_error}")
+            
+            frame_count += 1
+        
+        cap.release()
+
+        # Clean up temp file
+        try:
+            os.unlink(video_path)
+        except:
+            pass
+        
+        # Aggregate results
+        if not frame_predictions:
+            raise HTTPException(status_code=500, detail="No frames could be analyzed")
+        
+        import numpy as np
+        avg_fake_prob = float(np.mean(frame_predictions))
+        is_fake = avg_fake_prob > 0.5
+        confidence = max(avg_fake_prob, 1 - avg_fake_prob)
+        
+        result = {
+            'prediction': 'FAKE' if is_fake else 'REAL',
+            'is_fake': is_fake,
+            'confidence': round(confidence, 2),
+            'probability': round(avg_fake_prob, 2),
+            'details': {
+                'fake_score': round(avg_fake_prob, 2),
+                'real_score': round(1 - avg_fake_prob, 2)
+            },
+            'frames_analyzed': len(frame_predictions),
+            'total_frames': frame_count,
+            'model_loaded': inference_service.model is not None
+        }
+        
+        print(f"✓ Video analysis complete: {result['prediction']} ({result['confidence']:.2%})")
+        print(f"  Frames analyzed: {len(frame_predictions)}/{frame_count}")
+        
+        # Save to database
+        try:
+            detection = Detection(
+                user_id=current_user.id,
+                filename=file.filename,
+                prediction=result['prediction'],
+                confidence=result['confidence']
+            )
+            db.add(detection)
+            db.commit()
+            db.refresh(detection)
+            
+            print(f"✓ Detection saved! ID: {detection.id}")
+        
+        except Exception as db_error:
+            print(f"⚠️  Database save failed: {db_error}")
+            db.rollback()
+        
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Video prediction failed!")
+        print(f"❌ Error: {str(e)}")
+        
+        import traceback
+        traceback.print_exc()
+        
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Video prediction failed: {str(e)}"
+        )
+
+
 @app.get("/history")
 def get_history(
     current_user: User = Depends(get_current_user),

@@ -14,6 +14,8 @@ interface PredictionResult {
     real_score: number;
   };
   model_loaded?: boolean;
+  frames_analyzed?: number;
+  total_frames?: number;
 }
 
 const API_URL = 'http://localhost:8000';
@@ -33,17 +35,28 @@ const DashboardPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<PredictionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [fileType, setFileType] = useState<'image' | 'video' | null>(null);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {
-      'image/*': ['.jpg', '.jpeg', '.png', '.webp']
+      'image/*': ['.jpg', '.jpeg', '.png', '.webp'],
+      'video/*': ['.mp4', '.mov', '.avi', '.webm']
     },
     maxFiles: 1,
     onDrop: (acceptedFiles: File[]) => {
       if (acceptedFiles.length > 0) {
         const file = acceptedFiles[0];
         setSelectedFile(file);
-        setPreview(URL.createObjectURL(file));
+        
+        // Detect file type
+        if (file.type.startsWith('image/')) {
+          setFileType('image');
+          setPreview(URL.createObjectURL(file));
+        } else if (file.type.startsWith('video/')) {
+          setFileType('video');
+          setPreview(URL.createObjectURL(file));
+        }
+        
         setResult(null);
         setError(null);
       }
@@ -51,7 +64,7 @@ const DashboardPage: React.FC = () => {
   });
 
   const handlePredict = async () => {
-    if (!selectedFile) return;
+    if (!selectedFile || !fileType) return;
 
     setLoading(true);
     setError(null);
@@ -60,9 +73,14 @@ const DashboardPage: React.FC = () => {
     const formData = new FormData();
     formData.append('file', selectedFile);
 
+    // Choose endpoint based on file type
+    const endpoint = fileType === 'video' 
+      ? `${API_URL}/predict/video`
+      : `${API_URL}/predict`;
+
     try {
       const response = await axios.post<PredictionResult>(
-        `${API_URL}/predict`,
+        endpoint,
         formData,
         {
           headers: {
@@ -75,7 +93,7 @@ const DashboardPage: React.FC = () => {
     } catch (err: any) {
       setError(
         err.response?.data?.detail || 
-        'Failed to analyze image. Please try again.'
+        `Failed to analyze ${fileType}. Please try again.`
       );
     } finally {
       setLoading(false);
@@ -87,6 +105,7 @@ const DashboardPage: React.FC = () => {
     setPreview(null);
     setResult(null);
     setError(null);
+    setFileType(null);
   };
 
   const handleLogout = () => {
@@ -104,56 +123,6 @@ const DashboardPage: React.FC = () => {
         {/* Header */}
         <div style={{ 
           display: 'flex', 
-          gap: '12px' 
-        }}>
-          <button
-            onClick={() => navigate('/')}
-            style={{
-              padding: '12px 24px',
-              backgroundColor: 'white',
-              border: '2px solid #1a237e',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontWeight: 600,
-              color: '#1a237e',
-              fontSize: '16px'
-            }}
-          >
-            Home
-          </button>
-          <button
-            onClick={() => navigate('/history')}
-            style={{
-              padding: '12px 24px',
-              backgroundColor: 'white',
-              border: '2px solid #1a237e',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontWeight: 600,
-              color: '#1a237e',
-              fontSize: '16px'
-            }}
-          >
-            History
-          </button>
-          <button
-            onClick={handleLogout}
-            style={{
-              padding: '12px 24px',
-              backgroundColor: 'white',
-              border: '2px solid #1a237e',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontWeight: 600,
-              color: '#1a237e',
-              fontSize: '16px'
-            }}
-          >
-            Logout
-          </button>
-        </div>
-        <div style={{ 
-          display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center', 
           marginBottom: '30px',
@@ -166,17 +135,63 @@ const DashboardPage: React.FC = () => {
             margin: 0,
             fontWeight: 700
           }}>
-            Deepfake Detector
+            🔍 Deepfake Detector
           </h1>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => navigate('/')}
+              style={{
+                padding: '12px 24px',
+                backgroundColor: 'white',
+                border: '2px solid #1a237e',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: 600,
+                color: '#1a237e',
+                fontSize: '16px'
+              }}
+            >
+              🏠 Home
+            </button>
+            <button
+              onClick={() => navigate('/history')}
+              style={{
+                padding: '12px 24px',
+                backgroundColor: 'white',
+                border: '2px solid #1a237e',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: 600,
+                color: '#1a237e',
+                fontSize: '16px'
+              }}
+            >
+              📊 History
+            </button>
+            <button
+              onClick={handleLogout}
+              style={{
+                padding: '12px 24px',
+                backgroundColor: 'white',
+                border: '2px solid #1a237e',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '16px',
+                fontWeight: 600,
+                color: '#1a237e'
+              }}
+            >
+              🚪 Logout
+            </button>
+          </div>
         </div>
-
         <p style={{ 
           textAlign: 'center', 
           marginBottom: '40px', 
           color: '#666',
           fontSize: '1.1rem'
         }}>
-          Upload an image to detect if it's real or manipulated
+          Upload an image or video to detect if it's real or manipulated
         </p>
 
         {/* Upload Area */}
@@ -194,16 +209,20 @@ const DashboardPage: React.FC = () => {
           }}
         >
           <input {...getInputProps()} />
-          <div style={{ fontSize: '72px', marginBottom: '20px' }}>☁️</div>
+          <div style={{ fontSize: '72px', marginBottom: '20px' }}>
+            {fileType === 'video' ? '🎬' : '☁️'}
+          </div>
           <h3 style={{ 
             fontSize: '1.5rem', 
             marginBottom: '10px',
             color: '#1a237e'
           }}>
-            {isDragActive ? 'Drop the image here' : 'Drag & drop an image, or click to select'}
+            {isDragActive 
+              ? 'Drop the file here' 
+              : 'Drag & drop an image or video, or click to select'}
           </h3>
           <p style={{ color: '#999', fontSize: '1rem' }}>
-            Supported: JPG, PNG, JPEG, WEBP (Max 10MB)
+            Images: JPG, PNG, JPEG, WEBP | Videos: MP4, MOV, AVI, WEBM (Max 50MB)
           </p>
         </div>
 
@@ -217,17 +236,32 @@ const DashboardPage: React.FC = () => {
             boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
           }}>
             <div style={{ textAlign: 'center' }}>
-              <img
-                src={preview}
-                alt="Preview"
-                style={{
-                  maxWidth: '100%',
-                  maxHeight: '500px',
-                  borderRadius: '12px',
-                  marginBottom: '24px',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                }}
-              />
+              {fileType === 'image' ? (
+                <img
+                  src={preview}
+                  alt="Preview"
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: '500px',
+                    borderRadius: '12px',
+                    marginBottom: '24px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  }}
+                />
+              ) : (
+                <video
+                  src={preview}
+                  controls
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: '500px',
+                    borderRadius: '12px',
+                    marginBottom: '24px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  }}
+                />
+              )}
+              
               <div style={{ 
                 display: 'flex', 
                 gap: '16px', 
@@ -251,7 +285,9 @@ const DashboardPage: React.FC = () => {
                     gap: '8px'
                   }}
                 >
-                  {loading ? '⏳ Analyzing...' : '🔍 Detect Deepfake'}
+                  {loading 
+                    ? `⏳ Analyzing ${fileType}...` 
+                    : `🔍 Detect Deepfake`}
                 </button>
                 <button
                   onClick={handleReset}
@@ -287,7 +323,9 @@ const DashboardPage: React.FC = () => {
           }}>
             <div style={{ fontSize: '64px', marginBottom: '16px' }}>⏳</div>
             <p style={{ fontSize: '1.2rem', color: '#666' }}>
-              Analyzing image with AI...
+              {fileType === 'video' 
+                ? 'Analyzing video frames with AI... This may take a minute.'
+                : 'Analyzing image with AI...'}
             </p>
           </div>
         )}
@@ -349,6 +387,20 @@ const DashboardPage: React.FC = () => {
               >
                 {(result.confidence * 100).toFixed(1)}% Confident
               </div>
+
+              {/* Video frames info */}
+              {fileType === 'video' && result.frames_analyzed && (
+                <div style={{
+                  backgroundColor: 'white',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  marginBottom: '20px'
+                }}>
+                  <p style={{ margin: 0, color: '#666' }}>
+                    📊 Analyzed {result.frames_analyzed} frames out of {result.total_frames} total
+                  </p>
+                </div>
+              )}
 
               {result.model_loaded === false && (
                 <div style={{

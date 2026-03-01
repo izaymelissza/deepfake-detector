@@ -1,8 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#fff' }}>
@@ -25,38 +27,95 @@ const LandingPage: React.FC = () => {
             Protect yourself from manipulated media using advanced
             machine learning technology
           </p>
-          <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
-            <button
-              onClick={() => navigate('/register')}
-              style={{
-                padding: '16px 40px',
-                backgroundColor: 'white',
-                color: '#1a237e',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '18px',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-              }}
-            >
-              Get Started Free 
-            </button>
-            <button
-              onClick={() => navigate('/login')}
-              style={{
-                padding: '16px 40px',
-                backgroundColor: 'transparent',
-                color: 'white',
-                border: '2px solid white',
-                borderRadius: '8px',
-                fontSize: '18px',
-                fontWeight: 'bold',
-                cursor: 'pointer'
-              }}
-            >
-              Sign In
-            </button>
+
+          {/* JAVÍTOTT GOMBOK - User alapján változnak */}
+          <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            {user ? (
+              // HA BE VAN JELENTKEZVE
+              <>
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  style={{
+                    padding: '16px 40px',
+                    backgroundColor: 'white',
+                    color: '#1a237e',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '18px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                  }}
+                >
+                  Go to Dashboard 🚀
+                </button>
+                <button
+                  onClick={() => navigate('/history')}
+                  style={{
+                    padding: '16px 40px',
+                    backgroundColor: 'transparent',
+                    color: 'white',
+                    border: '2px solid white',
+                    borderRadius: '8px',
+                    fontSize: '18px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
+                >
+                  View History 📊
+                  </button>
+                <button
+                  onClick={logout}
+                  style={{
+                    padding: '16px 40px',
+                    backgroundColor: 'transparent',
+                    color: 'white',
+                    border: '2px solid white',
+                    borderRadius: '8px',
+                    fontSize: '18px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Logout 🚪
+                </button>
+              </>
+            ) : (
+              // HA NINCS BEJELENTKEZVE
+              <>
+                <button
+                  onClick={() => navigate('/register')}
+                  style={{
+                    padding: '16px 40px',
+                    backgroundColor: 'white',
+                    color: '#1a237e',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '18px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                  }}
+                >
+                  Get Started Free 🚀
+                </button>
+                <button
+                  onClick={() => navigate('/login')}
+                  style={{
+                    padding: '16px 40px',
+                    backgroundColor: 'transparent',
+                    color: 'white',
+                    border: '2px solid white',
+                    borderRadius: '8px',
+                    fontSize: '18px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Sign In
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -156,13 +215,16 @@ const LandingPage: React.FC = () => {
       >
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <h2 style={{ fontSize: '2.5rem', marginBottom: '20px', fontWeight: 700 }}>
-            Ready to Start Detecting?
+            {user ? 'Ready to Detect?' : 'Ready to Start Detecting?'}
           </h2>
           <p style={{ fontSize: '1.3rem', opacity: 0.9, marginBottom: '40px' }}>
-            Join thousands of users protecting themselves from deepfakes
+            {user 
+              ? 'Upload an image and let AI analyze it for you'
+              : 'Join thousands of users protecting themselves from deepfakes'
+            }
           </p>
           <button
-            onClick={() => navigate('/register')}
+            onClick={() => navigate(user ? '/dashboard' : '/register')}
             style={{
               padding: '18px 50px',
               backgroundColor: 'white',
@@ -175,7 +237,7 @@ const LandingPage: React.FC = () => {
               boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
             }}
           >
-            Get Started for Free 
+            {user ? 'Start Detecting 🔍' : 'Get Started for Free 🚀'}
           </button>
         </div>
       </div>
@@ -183,7 +245,7 @@ const LandingPage: React.FC = () => {
       {/* Footer */}
       <div style={{ backgroundColor: '#1a237e', color: 'white', padding: '30px 20px', textAlign: 'center' }}>
         <p style={{ margin: 0, opacity: 0.7 }}>
-          © 2025 DeepGuard
+          © 2024 DeepGuard. Built with ❤️ for safer internet.
         </p>
       </div>
     </div>

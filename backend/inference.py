@@ -4,7 +4,6 @@ from PIL import Image
 import os
 import random
 
-# Ha van model.py, importáld:
 try:
     from model import DeepfakeDetector
     MODEL_AVAILABLE = True
@@ -65,24 +64,24 @@ class InferenceService:
     def predict(self, image: Image.Image) -> dict:
         """Run inference on image"""
         
-        # DUMMY PREDICTION (ha nincs model)
+        # DUMMY PREDICTION IF MODEL NOT LOADED
         if self.model is None:
             is_fake = random.choice([True, False])
             confidence = random.uniform(0.75, 0.99)
+            fake_prob = confidence if is_fake else 1 - confidence
             
             return {
                 'prediction': 'FAKE' if is_fake else 'REAL',
                 'is_fake': is_fake,
                 'confidence': round(confidence, 2),
-                'probability': round(confidence if is_fake else 1 - confidence, 2),
+                'probability': round(fake_prob, 2),
                 'details': {
-                    'fake_score': round(confidence if is_fake else 1 - confidence, 2),
-                    'real_score': round(1 - confidence if is_fake else confidence, 2)
+                    'fake_score': round(fake_prob, 2),
+                    'real_score': round(1 - fake_prob, 2)
                 },
                 'model_loaded': False
             }
         
-        # REAL MODEL PREDICTION
         try:
             # Preprocess image
             image_tensor = self.transform(image).unsqueeze(0).to(self.device)
@@ -90,41 +89,46 @@ class InferenceService:
             # Inference
             with torch.no_grad():
                 output = self.model(image_tensor)
-                probability = output.item()
+                real_prob = output.item()  # ← JAVÍTVA: Model outputs REAL probability!
             
-            # Interpret result
-            is_fake = probability > 0.5
-            confidence = probability if is_fake else 1 - probability
+            # Interpret result 
+            fake_prob = 1 - real_prob     # ← Fake probability
+            is_fake = fake_prob > 0.5      # ← Is fake if fake_prob > 0.5
+            confidence = max(real_prob, fake_prob)  # ← Confidence = higher of the two
             
             return {
                 'prediction': 'FAKE' if is_fake else 'REAL',
                 'is_fake': is_fake,
                 'confidence': round(confidence, 2),
-                'probability': round(probability, 2),
+                'probability': round(fake_prob, 2),  # Frontend expects fake probability
                 'details': {
-                    'fake_score': round(probability, 2),
-                    'real_score': round(1 - probability, 2)
+                    'fake_score': round(fake_prob, 2),
+                    'real_score': round(real_prob, 2)
                 },
                 'model_loaded': True
             }
         
         except Exception as e:
             print(f"❌ Model inference failed: {e}")
+            import traceback
+            traceback.print_exc()
+            
             # Fallback to dummy
             is_fake = random.choice([True, False])
             confidence = random.uniform(0.75, 0.99)
+            fake_prob = confidence if is_fake else 1 - confidence
             
             return {
                 'prediction': 'FAKE' if is_fake else 'REAL',
                 'is_fake': is_fake,
                 'confidence': round(confidence, 2),
-                'probability': round(confidence if is_fake else 1 - confidence, 2),
+                'probability': round(fake_prob, 2),
                 'details': {
-                    'fake_score': round(confidence if is_fake else 1 - confidence, 2),
-                    'real_score': round(1 - confidence if is_fake else confidence, 2)
+                    'fake_score': round(fake_prob, 2),
+                    'real_score': round(1 - fake_prob, 2)
                 },
-                'model_loaded': False
+                'model_loaded': False,
+                'error': str(e)
             }
-
 # Global instance
 inference_service = InferenceService()

@@ -19,9 +19,11 @@ class DeepfakeDetector(nn.Module):
             nn.Dropout(p=0.4),
             nn.Linear(num_features, 512),
             nn.ReLU(),
+            nn.BatchNorm1d(512),
             nn.Dropout(p=0.3),
             nn.Linear(512, 256),
             nn.ReLU(),
+            nn.BatchNorm1d(256),
             nn.Dropout(p=0.2),
             nn.Linear(256, 1),
             nn.Sigmoid()

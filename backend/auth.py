@@ -11,17 +11,21 @@ SECRET_KEY = "szakdoga"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 1 week
 
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Password hashing - ARGON2 (jobb mint bcrypt!)
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
+def get_password_hash(password: str) -> str:
+    """Hash password with Argon2"""
+    return pwd_context.hash(password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify password"""
     return pwd_context.verify(plain_password, hashed_password)
 
-def get_password_hash(password: str) -> str:
-    """Hash password"""
-    return pwd_context.hash(password)
+def hash_password(password: str) -> str:
+    """Alias for get_password_hash"""
+    return get_password_hash(password)
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     """Create JWT token"""
@@ -34,7 +38,6 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     
     to_encode.update({"exp": expire})
     
-    # Ensure sub is string
     if "sub" in to_encode:
         to_encode["sub"] = str(to_encode["sub"])
     
@@ -45,7 +48,7 @@ def create_token(user_id: int) -> str:
     """Create token with user_id"""
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user_id},  # Will be converted to string
+        data={"sub": user_id},
         expires_delta=access_token_expires
     )
     return access_token
@@ -72,7 +75,6 @@ def get_current_user(
         if user_id_str is None:
             raise credentials_exception
         
-        # Convert string to int
         user_id = int(user_id_str)
         
     except (JWTError, ValueError) as e:

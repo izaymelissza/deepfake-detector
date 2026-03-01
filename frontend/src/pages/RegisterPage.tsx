@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Container, TextField, Button, Typography, Box, Alert } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 
 const RegisterPage: React.FC = () => {
@@ -9,7 +10,7 @@ const RegisterPage: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { register } = useAuth();
+  const { register, user } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -19,7 +20,7 @@ const RegisterPage: React.FC = () => {
 
     try {
       await register(email, username, password);
-      navigate('/dashboard');
+      navigate('/dashboard', { replace: true });
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Registration failed');
     } finally {

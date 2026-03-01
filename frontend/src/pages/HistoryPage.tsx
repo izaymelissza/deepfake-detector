@@ -20,7 +20,7 @@ const HistoryPage: React.FC = () => {
 
   useEffect(() => {
     if (!user) {
-      navigate('/login');
+      navigate('/login', { replace: true });
       return;
     }
 
