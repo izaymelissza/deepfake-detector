@@ -16,6 +16,8 @@ interface PredictionResult {
   model_loaded?: boolean;
   frames_analyzed?: number;
   total_frames?: number;
+  gradcam?: string;
+  gradcam_available?: boolean;
 }
 
 const API_URL = 'http://localhost:8000';
@@ -388,6 +390,42 @@ const DashboardPage: React.FC = () => {
                 {(result.confidence * 100).toFixed(1)}% Confident
               </div>
 
+              {/* Grad-CAM Heatmap - ÚJ! */}
+              {result.gradcam_available && result.gradcam && fileType === 'image' && (
+                <div style={{
+                  backgroundColor: 'white',
+                  padding: '24px',
+                  borderRadius: '12px',
+                  marginBottom: '30px',
+                  border: '2px solid #1a237e'
+                }}>
+                  <h3 style={{ 
+                    fontSize: '1.5rem', 
+                    marginBottom: '16px',
+                    color: '#1a237e'
+                  }}>
+                    🔍 AI Focus Areas (Grad-CAM)
+                  </h3>
+                  <p style={{ 
+                    color: '#666', 
+                    marginBottom: '16px',
+                    fontSize: '0.95rem'
+                  }}>
+                    Red/yellow areas show where the AI focused to make its decision
+                  </p>
+                  <img
+                    src={result.gradcam}
+                    alt="Grad-CAM Heatmap"
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '500px',
+                      borderRadius: '12px',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                    }}
+                  />
+                </div>
+              )}
+
               {/* Video frames info */}
               {fileType === 'video' && result.frames_analyzed && (
                 <div style={{
@@ -496,6 +534,7 @@ const DashboardPage: React.FC = () => {
             </div>
           </div>
         )}
+      
       </div>
     </div>
   );

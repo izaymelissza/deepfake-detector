@@ -140,11 +140,8 @@ async def predict_deepfake(
         contents = await file.read()
         image = Image.open(io.BytesIO(contents)).convert('RGB')
         
-        print(f"✓ Image loaded: {file.filename}")
-        
-        # Predict using model
-        result = inference_service.predict(image)
-        
+        result = inference_service.predict(image, return_gradcam=True)
+
         print(f"✓ Prediction: {result['prediction']}, Confidence: {result['confidence']}")
         
         # Save to database
@@ -164,7 +161,6 @@ async def predict_deepfake(
         except Exception as db_error:
             print(f"⚠️  Database save failed: {db_error}")
             db.rollback()
-            # Continue anyway - prediction still works!
         
         return result
         
@@ -224,12 +220,12 @@ async def predict_video(
                 try:
                     # Convert frame to PIL Image
                     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    from PIL import Image
                     pil_image = Image.fromarray(frame_rgb)
-                    
+
                     # Predict on frame
                     frame_result = inference_service.predict(pil_image)
-                    frame_predictions.append(frame_result['probability'])  # fake probability
+                    fake_prob = frame_result['probability']
+                    frame_predictions.append(fake_prob)
                     
                 except Exception as frame_error:
                     print(f"⚠️  Frame {frame_count} failed: {frame_error}")

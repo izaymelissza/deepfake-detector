@@ -3,9 +3,12 @@ from torchvision import transforms
 from PIL import Image
 import os
 import random
+import io
+import base64
 
 try:
     from model import DeepfakeDetector
+    from gradcam import get_gradcam_for_image
     MODEL_AVAILABLE = True
 except ImportError:
     MODEL_AVAILABLE = False
@@ -61,7 +64,7 @@ class InferenceService:
             print(f"⚠️  Using dummy predictions!")
             return False
     
-    def predict(self, image: Image.Image) -> dict:
+    def predict(self, image: Image.Image, return_gradcam: bool = False) -> dict:
         """Run inference on image"""
         
         # DUMMY PREDICTION IF MODEL NOT LOADED
@@ -70,7 +73,7 @@ class InferenceService:
             confidence = random.uniform(0.75, 0.99)
             fake_prob = confidence if is_fake else 1 - confidence
             
-            return {
+            result = {
                 'prediction': 'FAKE' if is_fake else 'REAL',
                 'is_fake': is_fake,
                 'confidence': round(confidence, 2),
@@ -81,32 +84,65 @@ class InferenceService:
                 },
                 'model_loaded': False
             }
+            
+            if return_gradcam:
+                result['gradcam_available'] = False
+            
+            return result  # ← MOST RETURN az utolsó sor!
         
+        # REAL MODEL PREDICTION
         try:
             # Preprocess image
             image_tensor = self.transform(image).unsqueeze(0).to(self.device)
             
             # Inference
+            self.model.eval()  # ← ADD HOZZÁ!
             with torch.no_grad():
                 output = self.model(image_tensor)
-                real_prob = output.item()  # ← JAVÍTVA: Model outputs REAL probability!
+                real_prob = output.item()
             
-            # Interpret result 
-            fake_prob = 1 - real_prob     # ← Fake probability
-            is_fake = fake_prob > 0.5      # ← Is fake if fake_prob > 0.5
-            confidence = max(real_prob, fake_prob)  # ← Confidence = higher of the two
+            # Interpret result
+            fake_prob = 1 - real_prob
+            is_fake = fake_prob > 0.5
+            confidence = max(real_prob, fake_prob)
             
-            return {
+            result = {
                 'prediction': 'FAKE' if is_fake else 'REAL',
                 'is_fake': is_fake,
                 'confidence': round(confidence, 2),
-                'probability': round(fake_prob, 2),  # Frontend expects fake probability
+                'probability': round(fake_prob, 2),
                 'details': {
                     'fake_score': round(fake_prob, 2),
                     'real_score': round(real_prob, 2)
                 },
                 'model_loaded': True
             }
+            
+            # Generate Grad-CAM if requested
+            if return_gradcam:
+                try:
+                    gradcam_result = get_gradcam_for_image(
+                        self.model, 
+                        image_tensor, 
+                        image, 
+                        self.device
+                    )
+                    
+                    # Convert overlayed image to base64
+                    buffered = io.BytesIO()
+                    gradcam_result['overlayed_image'].save(buffered, format="PNG")
+                    img_str = base64.b64encode(buffered.getvalue()).decode()
+                    
+                    result['gradcam'] = f"data:image/png;base64,{img_str}"
+                    result['gradcam_available'] = True
+                    
+                except Exception as gradcam_error:
+                    print(f"⚠️  Grad-CAM failed: {gradcam_error}")
+                    import traceback
+                    traceback.print_exc()
+                    result['gradcam_available'] = False
+            
+            return result
         
         except Exception as e:
             print(f"❌ Model inference failed: {e}")
