@@ -137,7 +137,7 @@ const DashboardPage: React.FC = () => {
             margin: 0,
             fontWeight: 700
           }}>
-            🔍 Deepfake Detector
+            Deepfake Detector
           </h1>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <button
@@ -153,7 +153,7 @@ const DashboardPage: React.FC = () => {
                 fontSize: '16px'
               }}
             >
-              🏠 Home
+              Home
             </button>
             <button
               onClick={() => navigate('/history')}
@@ -168,7 +168,7 @@ const DashboardPage: React.FC = () => {
                 fontSize: '16px'
               }}
             >
-              📊 History
+              History
             </button>
             <button
               onClick={handleLogout}
@@ -183,7 +183,7 @@ const DashboardPage: React.FC = () => {
                 color: '#1a237e'
               }}
             >
-              🚪 Logout
+              Logout
             </button>
           </div>
         </div>
@@ -288,8 +288,8 @@ const DashboardPage: React.FC = () => {
                   }}
                 >
                   {loading 
-                    ? `⏳ Analyzing ${fileType}...` 
-                    : `🔍 Detect Deepfake`}
+                    ? `Analyzing ${fileType}...` 
+                    : `Detect Deepfake`}
                 </button>
                 <button
                   onClick={handleReset}
@@ -307,7 +307,7 @@ const DashboardPage: React.FC = () => {
                     gap: '8px'
                   }}
                 >
-                  🗑️ Clear
+                  Clear
                 </button>
               </div>
             </div>
@@ -404,7 +404,7 @@ const DashboardPage: React.FC = () => {
                     marginBottom: '16px',
                     color: '#1a237e'
                   }}>
-                    🔍 AI Focus Areas (Grad-CAM)
+                    AI Focus Areas (Grad-CAM)
                   </h3>
                   <p style={{ 
                     color: '#666', 
@@ -435,7 +435,7 @@ const DashboardPage: React.FC = () => {
                   marginBottom: '20px'
                 }}>
                   <p style={{ margin: 0, color: '#666' }}>
-                    📊 Analyzed {result.frames_analyzed} frames out of {result.total_frames} total
+                    Analyzed {result.frames_analyzed} frames out of {result.total_frames} total
                   </p>
                 </div>
               )}
@@ -466,7 +466,7 @@ const DashboardPage: React.FC = () => {
                   fontSize: '1.3rem',
                   color: '#1a237e'
                 }}>
-                  📊 Analysis Details:
+                  Analysis Details:
                 </h4>
                 
                 <div style={{ marginBottom: '24px' }}>

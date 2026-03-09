@@ -179,12 +179,12 @@ const HistoryPage: React.FC = () => {
                     color: '#666',
                     wordBreak: 'break-all'
                   }}>
-                    📄 {detection.filename}
+                    {detection.filename}
                   </div>
                 </div>
 
                 <div style={{ fontSize: '0.85rem', color: '#999' }}>
-                  🕐 {new Date(detection.created_at).toLocaleString('hu-HU')}
+                  {new Date(detection.created_at).toLocaleString('hu-HU')}
                 </div>
               </div>
             ))}

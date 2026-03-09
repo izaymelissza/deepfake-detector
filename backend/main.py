@@ -9,7 +9,7 @@ from datetime import datetime
 from database import get_db, User, Detection
 from auth import get_password_hash, verify_password, create_token, get_current_user
 from inference import inference_service
-import cv2
+import cv2 # type: ignore
 import tempfile
 import os
 

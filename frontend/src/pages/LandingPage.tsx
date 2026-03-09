@@ -28,7 +28,7 @@ const LandingPage: React.FC = () => {
             machine learning technology
           </p>
 
-          {/* JAVÍTOTT GOMBOK - User alapján változnak */}
+          {/*User alapján változnak */}
           <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
             {user ? (
               // HA BE VAN JELENTKEZVE
@@ -47,7 +47,7 @@ const LandingPage: React.FC = () => {
                     boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
                   }}
                 >
-                  Go to Dashboard 🚀
+                  Go to Dashboard 
                 </button>
                 <button
                   onClick={() => navigate('/history')}
@@ -62,7 +62,7 @@ const LandingPage: React.FC = () => {
                     cursor: 'pointer'
                   }}
                 >
-                  View History 📊
+                  View History 
                   </button>
                 <button
                   onClick={logout}
@@ -77,7 +77,7 @@ const LandingPage: React.FC = () => {
                     cursor: 'pointer'
                   }}
                 >
-                  Logout 🚪
+                  Logout 
                 </button>
               </>
             ) : (
