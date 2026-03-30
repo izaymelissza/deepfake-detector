@@ -16,6 +16,7 @@ backend/venv/
 backend/__pycache__/
 backend/*.db
 backend/app.db
+backend/.env
 
 # Node
 frontend/node_modules/

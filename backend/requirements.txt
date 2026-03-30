@@ -6,6 +6,7 @@ passlib[argon2]==1.7.4
 argon2-cffi
 sqlalchemy==2.0.23
 pydantic[email]==2.5.0
+python-dotenv==1.0.0
 
 # ML
 torch==2.1.0

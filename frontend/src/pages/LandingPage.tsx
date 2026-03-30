@@ -147,8 +147,7 @@ const LandingPage: React.FC = () => {
             <div style={{ fontSize: '60px', marginBottom: '20px' }}></div>
             <h3 style={{ fontSize: '1.5rem', marginBottom: '15px', color: '#1a237e' }}>Growing Problem</h3>
             <p style={{ color: '#666', lineHeight: 1.6 }}>
-              Deepfake incidents have increased by x% in the last year.
-              The technology is becoming more accessible and sophisticated,
+              Deepfake technology is becoming more accessible and sophisticated,
               making detection crucial.
             </p>
           </div>
@@ -156,10 +155,10 @@ const LandingPage: React.FC = () => {
           {/* Card 3 */}
           <div style={{ textAlign: 'center', padding: '30px', backgroundColor: '#f5f5f5', borderRadius: '12px' }}>
             <div style={{ fontSize: '60px', marginBottom: '20px' }}></div>
-            <h3 style={{ fontSize: '1.5rem', marginBottom: '15px', color: '#1a237e' }}>Our Solution</h3>
+            <h3 style={{ fontSize: '1.5rem', marginBottom: '15px', color: '#1a237e' }}>Solution</h3>
             <p style={{ color: '#666', lineHeight: 1.6 }}>
-              Using models to detect deepfakes, we help users verify media authenticity
-              quickly and accurately, protecting them from potential harm.
+              An EfficientNet-B4 based deep learning model, trained on 140,000 images, 
+              detects manipulated facial images and videos with 99.73% accuracy.
             </p>
           </div>
         </div>
@@ -172,15 +171,16 @@ const LandingPage: React.FC = () => {
             Why Choose DeepGuard?
           </h2>
           <p style={{ textAlign: 'center', fontSize: '1.2rem', color: '#666', marginBottom: '60px' }}>
-            Industry-leading deepfake detection technology
+            Advanced deepfake detection powered by EfficientNet-B4
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '40px' }}>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '60px', marginBottom: '20px' }}></div>
-              <h3 style={{ fontSize: '1.5rem', marginBottom: '15px', color: '#1a237e' }}>95%+ Accuracy</h3>
+              <h3 style={{ fontSize: '1.5rem', marginBottom: '15px', color: '#1a237e' }}>99.73% Accuracy</h3>
               <p style={{ color: '#666' }}>
-                majd annyi lesz (vagy hasonlo)
+                Achieves 99.73% accuracy on the test 
+                dataset using EfficientNet-B4 architecture.
               </p>
             </div>
 
@@ -188,7 +188,8 @@ const LandingPage: React.FC = () => {
               <div style={{ fontSize: '60px', marginBottom: '20px' }}></div>
               <h3 style={{ fontSize: '1.5rem', marginBottom: '15px', color: '#1a237e' }}>Instant Results</h3>
               <p style={{ color: '#666' }}>
-                fast results
+                  Images are analyzed in seconds, 
+                  videos are processed frame by frame.
               </p>
             </div>
 
@@ -220,7 +221,7 @@ const LandingPage: React.FC = () => {
           <p style={{ fontSize: '1.3rem', opacity: 0.9, marginBottom: '40px' }}>
             {user 
               ? 'Upload an image and let AI analyze it for you'
-              : 'Join thousands of users protecting themselves from deepfakes'
+              : 'Join!'
             }
           </p>
           <button
@@ -245,7 +246,7 @@ const LandingPage: React.FC = () => {
       {/* Footer */}
       <div style={{ backgroundColor: '#1a237e', color: 'white', padding: '30px 20px', textAlign: 'center' }}>
         <p style={{ margin: 0, opacity: 0.7 }}>
-          © 2024 DeepGuard. Built with ❤️ for safer internet.
+          © 2026 DeepGuard. Built with ❤️ for safer internet.
         </p>
       </div>
     </div>

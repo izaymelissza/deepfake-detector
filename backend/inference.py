@@ -88,20 +88,18 @@ class InferenceService:
             if return_gradcam:
                 result['gradcam_available'] = False
             
-            return result  # ← MOST RETURN az utolsó sor!
+            return result  
         
         # REAL MODEL PREDICTION
         try:
-            # Preprocess image
             image_tensor = self.transform(image).unsqueeze(0).to(self.device)
             
             # Inference
-            self.model.eval()  # ← ADD HOZZÁ!
+            self.model.eval()  
             with torch.no_grad():
                 output = self.model(image_tensor)
                 real_prob = output.item()
             
-            # Interpret result
             fake_prob = 1 - real_prob
             is_fake = fake_prob > 0.5
             confidence = max(real_prob, fake_prob)
@@ -118,7 +116,6 @@ class InferenceService:
                 'model_loaded': True
             }
             
-            # Generate Grad-CAM if requested
             if return_gradcam:
                 try:
                     gradcam_result = get_gradcam_for_image(
@@ -128,12 +125,12 @@ class InferenceService:
                         self.device
                     )
                     
-                    # Convert overlayed image to base64
                     buffered = io.BytesIO()
                     gradcam_result['overlayed_image'].save(buffered, format="PNG")
                     img_str = base64.b64encode(buffered.getvalue()).decode()
                     
                     result['gradcam'] = f"data:image/png;base64,{img_str}"
+                    
                     result['gradcam_available'] = True
                     
                 except Exception as gradcam_error:
@@ -166,5 +163,4 @@ class InferenceService:
                 'model_loaded': False,
                 'error': str(e)
             }
-# Global instance
 inference_service = InferenceService()

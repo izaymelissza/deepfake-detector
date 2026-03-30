@@ -5,13 +5,15 @@ from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
+import os
+from dotenv import load_dotenv
 
-# Config
-SECRET_KEY = "szakdoga"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 1 week
+load_dotenv()
 
-# Password hashing - ARGON2 (jobb mint bcrypt!)
+SECRET_KEY = os.getenv('SECRET_KEY', 'secret-key')
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  
+
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
@@ -78,7 +80,7 @@ def get_current_user(
         user_id = int(user_id_str)
         
     except (JWTError, ValueError) as e:
-        print(f"❌ JWT Error: {e}")
+        print(f"JWT Error: {e}")
         raise credentials_exception
     
     user = db.query(User).filter(User.id == user_id).first()

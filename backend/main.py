@@ -108,10 +108,6 @@ def login(
     form_data: OAuth2PasswordRequestForm = Depends(),  # ← ÚJ! Form helyett JSON
     db: Session = Depends(get_db)
 ):
-    # form_data.username = email
-    # form_data.password = password
-    
-    # Find user
     user = db.query(User).filter(User.email == form_data.username).first()
     
     if not user or not verify_password(form_data.password, user.hashed_password):
@@ -190,7 +186,6 @@ async def predict_video(
         raise HTTPException(status_code=400, detail="File must be a video")
     
     try:
-        # Save uploaded video to temp file
         with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_file:
             contents = await file.read()
             tmp_file.write(contents)
@@ -215,20 +210,17 @@ async def predict_video(
             if not ret:
                 break
             
-            # Only analyze every Nth frame
             if frame_count % sample_rate == 0:
                 try:
-                    # Convert frame to PIL Image
                     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     pil_image = Image.fromarray(frame_rgb)
 
-                    # Predict on frame
                     frame_result = inference_service.predict(pil_image)
                     fake_prob = frame_result['probability']
                     frame_predictions.append(fake_prob)
                     
                 except Exception as frame_error:
-                    print(f"⚠️  Frame {frame_count} failed: {frame_error}")
+                    print(f"Frame {frame_count} failed: {frame_error}")
             
             frame_count += 1
         
@@ -245,6 +237,7 @@ async def predict_video(
             raise HTTPException(status_code=500, detail="No frames could be analyzed")
         
         import numpy as np
+
         avg_fake_prob = float(np.mean(frame_predictions))
         is_fake = avg_fake_prob > 0.5
         confidence = max(avg_fake_prob, 1 - avg_fake_prob)

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, TextField, Button, Typography, Box, Alert } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 
 const RegisterPage: React.FC = () => {

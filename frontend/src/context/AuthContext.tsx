@@ -21,14 +21,11 @@ const API_URL = 'http://localhost:8000';
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<string | null>(null);
 
-  // ÚJ: Token betöltése és axios config oldal betöltéskor
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      // Állítsd be az axios default header-t!
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(token);
-      console.log('✓ Token loaded from localStorage:', token.substring(0, 20) + '...');
     }
   }, []);
 
@@ -40,7 +37,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     setUser(token);
     
-    console.log('✓ Registered and token set');
   };
 
   const login = async (email: string, password: string) => {
@@ -54,16 +50,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.setItem('token', token);
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     setUser(token);
-    
-    console.log('✓ Logged in and token set');
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     delete axios.defaults.headers.common['Authorization'];
     setUser(null);
-    
-    console.log('✓ Logged out and token cleared');
   };
 
   return (
